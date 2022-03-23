@@ -1,6 +1,13 @@
 # Ubiquant-Market-Prediction
-韭病成良医
+Quick Start: [](https://bigquant.com/community/t/topic/199242)
 
-Quick Start: 
+Pretrained models for transformer:
 
-<img src="./fig/bigquant.com_community.png" alt="bigquant.com_community" style="zoom: 150%;" />
+[](https://huggingface.co/transformers/v3.3.1/pretrained_models.html)
+
+
+
+Reference:
+
+Funnel-Transformer: [[code](https://github.com/laiguokun/Funnel-Transformer)] [[paper](https://arxiv.org/pdf/2006.03236.pdf)]
+
