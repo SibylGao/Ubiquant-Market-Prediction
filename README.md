@@ -1,9 +1,9 @@
 # Ubiquant-Market-Prediction
-Quick Start: [](https://bigquant.com/community/t/topic/199242)
+Quick Start: [https://bigquant.com/community/t/topic/199242](https://bigquant.com/community/t/topic/199242)
 
 Pretrained models for transformer:
 
-[](https://huggingface.co/transformers/v3.3.1/pretrained_models.html)
+[https://huggingface.co/transformers/v3.3.1/pretrained_models.html](https://huggingface.co/transformers/v3.3.1/pretrained_models.html)
 
 
 
