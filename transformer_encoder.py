@@ -11,6 +11,7 @@ Transformer script based on the work of A. Vaswani et. al. (2017) in
 import torch
 import torch.nn as nn
 import torch.nn.functional as f
+from torch.autograd import Variable
 
 
 def scaled_dot_product_attention(query, key, value):
@@ -136,7 +137,7 @@ class Encoder(nn.Module):
         )
 
     def forward(self, X):
-        seq_length, dimension = X.size(1), X.size(2)
+        seq_length, dimension = X.size(1), X.size(2)     #[batch, seq_length, dimension]
         out = X
         # Computes the positional encodings
         out += positioning_encoding(seq_length, dimension)
@@ -166,7 +167,7 @@ class TransformerModel(nn.Module):
     def forward(self, X):
         enc_out = self.encoder(X)
         #flat = self.flatten(enc_out)
-        out = self.relu(self.linear(enc_out[:, -1, :]))
+        out = self.relu(self.linear(enc_out[:, -1, :]))     
         return out
 
 
@@ -176,7 +177,7 @@ class TransformerModel(nn.Module):
 #print(out.shape)
 
 def tcorr(x,y):
-    x_mean=x.mean(dim=0)
+    x_mean=x.mean(dim=0)      #[B,L]
     y_mean=y.mean(dim=0)
     x_d=torch.add(x,-x_mean)
     y_d=torch.add(y,-y_mean)
@@ -186,3 +187,6 @@ def tcorr(x,y):
 # loss by Guidong Liu
 def loss_function_liu(x,y):
     return nn.MSELoss()(x,y)-tcorr(x,y)+1
+
+def MSE_loss(x,y):
+    return f.mse_loss(x,y,size_average=True)

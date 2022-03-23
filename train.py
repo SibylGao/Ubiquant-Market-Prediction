@@ -5,13 +5,15 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import numpy as np
+from utils import *
 from argsParser import getArgsParser,checkArgs
 import torch.utils
 import torch.utils.checkpoint
 from tqdm import tqdm
 
 from data_csv_gao import DataLoader as csv_loader
-from transformer_encoder import TransformerModel, loss_function_liu
+from transformer_encoder import TransformerModel, loss_function_liu, MSE_loss
 
 torch.set_num_threads(20)
 # Arg parser
@@ -40,5 +42,58 @@ model.cuda()
 model.train()
 
 # model loss
+model_loss = MSE_loss()
 optimizer = optim.Adam(model.parameters(), lr = args.lr, betas=(0.9, 0.999), weight_decay=args.wd)
 
+
+def train_sample(sample):
+
+    optimizer.zero_grad()
+
+    sample_cuda = tocuda(sample)
+
+    outputs = model(sample_cuda["features"])
+
+    loss = model_loss(outputs,sample_cuda["target"])
+
+    loss.backward()
+
+    optimizer.step()
+
+    return loss.data.cpu().item()
+
+
+# main function
+def train():
+    milestones = [int(epoch_idx) for epoch_idx in args.lrepochs.split(':')[0].split(',')]
+    lr_gamma = 1 / float(args.lrepochs.split(':')[1])
+    lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones, gamma=lr_gamma,
+                                                        last_epoch=args.start_epoch)      #step 
+    last_loss = None
+    this_loss = None
+    for epoch_idx in range(args.start_epoch, args.end_epochs):
+        global_step = len(train_loader) * epoch_idx
+        if last_loss is None:
+            last_loss = 999999
+        else:
+            last_loss = this_loss
+        this_loss = []
+
+        for batch_idx, sample in enumerate(train_loader):
+            start_time = time.time()
+            global_step = len(train_loader) * epoch_idx + batch_idx
+            do_summary = global_step % args.summary_freq == 0
+            
+            loss = train_sample(sample, epoch_idx, batch_idx, detailed_summary=do_summary)
+            this_loss.append(loss)
+
+        # checkpoint
+        if (epoch_idx + 1) % args.save_freq == 0:
+            torch.save({
+                'epoch': epoch_idx,
+                'model': model.state_dict(),
+                'optimizer': optimizer.state_dict()},
+                "{}/model_{:0>6}.ckpt".format(args.logckptdir+args.info.replace(" ","_"), epoch_idx  ))
+        this_loss = np.mean(this_loss)
+
+        lr_scheduler.step()

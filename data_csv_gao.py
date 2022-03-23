@@ -24,7 +24,12 @@ class DataLoader():
             return sample
         else:
             ## To do:
-            return 0
+            # return 0
+            sample = {}
+            sample["time_id"] = landmarks.iloc[:,[1]]    # [row_id,time_id,investment_id,target,f...] 取第二列
+            sample["target"] = landmarks.iloc[:,[3]]
+            sample["features"] = landmarks.iloc[:,4:]
+            return sample
     def __len__(self):
         return len(self.data)
 

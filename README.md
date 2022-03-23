@@ -3,4 +3,4 @@
 
 Quick Start: 
 
-<img src="bigquant.com_community.png" alt="bigquant.com_community" style="zoom: 150%;" />
+<img src="./fig/bigquant.com_community.png" alt="bigquant.com_community" style="zoom: 150%;" />
