@@ -13,7 +13,7 @@ import torch.utils.checkpoint
 from tqdm import tqdm
 
 from data_csv_gao import DataLoader as csv_loader
-from transformer_encoder import TransformerModel, loss_function_liu, MSE_loss
+from transformer_encoder import TransformerModel, loss_function_liu, MSE_loss,tcorr
 
 torch.set_num_threads(20)
 # Arg parser
@@ -42,7 +42,9 @@ model.cuda()
 model.train()
 
 # model loss
-model_loss = MSE_loss()
+# model_loss = MSE_loss()
+model_loss = loss_function_liu()
+model_corr = tcorr()
 optimizer = optim.Adam(model.parameters(), lr = args.lr, betas=(0.9, 0.999), weight_decay=args.wd)
 
 
@@ -53,14 +55,14 @@ def train_sample(sample):
     sample_cuda = tocuda(sample)
 
     outputs = model(sample_cuda["features"])
-
     loss = model_loss(outputs,sample_cuda["target"])
+    corr = model_corr(outputs,sample_cuda["target"])
 
     loss.backward()
 
     optimizer.step()
 
-    return loss.data.cpu().item()
+    return loss.data.cpu().item(),corr
 
 
 # main function
@@ -84,7 +86,7 @@ def train():
             global_step = len(train_loader) * epoch_idx + batch_idx
             do_summary = global_step % args.summary_freq == 0
             
-            loss = train_sample(sample, epoch_idx, batch_idx, detailed_summary=do_summary)
+            loss, corr = train_sample(sample)
             this_loss.append(loss)
 
         # checkpoint
