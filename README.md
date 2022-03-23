@@ -3,4 +3,4 @@
 
 Quick Start: 
 
-![bigquant.com_community](bigquant.com_community.png)
+<img src="bigquant.com_community.png" alt="bigquant.com_community" style="zoom:80%;" />
